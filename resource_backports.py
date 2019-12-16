@@ -3,11 +3,9 @@
 import urllib.request
 import json
 import hashlib
-import time
 import shutil
 import os
 from threading import Thread
-from PIL import Image
 from pathlib import Path
 from zipfile import ZipFile
 
