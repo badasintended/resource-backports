@@ -1,5 +1,5 @@
 # Resource Backports ![m][badge1]
-Undo [The Flattening][wiki/flattening] of Minecraft and backport most of the [New Texture][wiki/texture_update] to old versions, avaliable to `1.6.1` until `1.12.2`, with some [limitation](#limitation). 
+Undo [The Flattening][wiki/flattening] of Minecraft and backport most of the [New Texture][wiki/texture_update] to old versions, avaliable to `1.6.1` until `1.12.2`, with some [limitation](#limitations). 
 ## Why?
 **Why the script to do it? Isn't uploading the converted pack enough?**  
 Well, although it will be easier to the players and especially **me**, it breaks Minecraft's [EULA][eula] and Mojang's [Terms and Use][terms], which is a bad thing to do.
