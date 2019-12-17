@@ -143,16 +143,6 @@ for source, target in mappings.items():
         continue
     copy_texture(source, target)
 
-
-pack_mcmeta = """
-{
-    "pack": {
-        "pack_format": %s,
-        "description": "Resource Backports script by deirn"
-    }
-}
-"""[1:-1] % int(target_input)
-
 if target_version in ["1.8", "1.10"]:
     source_workaround = [
         join_path(root_dir, "workarounds/bed_foot.json"),
@@ -165,4 +155,40 @@ if target_version in ["1.8", "1.10"]:
     for i in [0, 1]:
         create_dir(target_workaround[i].parent)
         func = lambda: shutil.copyfile(source_workaround[i], target_workaround[i])
-        loading(func, "Copying workaround %s" % str(i))
+        loading(func, "Copying workaround (%s/2)" % str(i))
+
+pack_mcmeta = """
+{
+    "pack": {
+        "pack_format": %s,
+        "description": "Resource Backports script by deirn"
+    }
+}
+"""[1:-1] % int(target_input)
+
+pack_mcmeta_path = join_path(target_root_dir, "pack.mcmeta")
+pack_mcmeta_file = open(pack_mcmeta_path, "w")
+func = lambda: pack_mcmeta_file.write(pack_mcmeta)
+loading(func, "Creating pack.mcmeta")
+pack_mcmeta_file.close()
+
+source_pack_icon = join_path(client_dir, "pack.png")
+target_pack_icon = join_path(target_root_dir, "pack.png")
+func = lambda: shutil.copyfile(source_pack_icon, target_pack_icon)
+loading(func, "Copying pack.png")
+
+output_zip_path = join_path(output_dir, target_version)
+func = lambda: shutil.make_archive(output_zip_path, "zip", target_root_dir, "assets")
+loading(func, "Compressing resource pack to zip")
+
+output_zip = ZipFile("%s.zip" % output_zip_path, "a")
+func = lambda: output_zip.write(pack_mcmeta_path, os.path.basename(pack_mcmeta_path))
+loading(func, "Adding pack.mcmeta to zip")
+func = lambda: output_zip.write(target_pack_icon, os.path.basename(target_pack_icon))
+loading(func, "Adding pack.png to zip")
+output_zip.close()
+
+shutil.rmtree(client_dir)
+shutil.rmtree(target_root_dir)
+
+print("Done, enjoy JAPPA's Textures. DO NOT DISTRIBUTE THE PACK!")
