@@ -1,4 +1,4 @@
-# Resource Backports ![m][badge1]
+# Resource Backports ![m][badge]
 Undo [The Flattening][wiki/flattening] of Minecraft and backport most of the [New Texture][wiki/texture_update] to old versions, avaliable to `1.6.1` until `1.12.2`, with some [limitation](#limitations). 
 ## Why?
 **Why the script to do it? Isn't uploading the converted pack enough?**  
@@ -6,20 +6,30 @@ Well, although it will be easier to the players and especially **me**, it breaks
 
 ## How?
 ### Windows
-TBA
+1. Download the latest [release][releases],
+2. Extract it,
+3. Open command prompt (`Win+R cmd`),
+4. Run these on cmd:
+   ```cmd
+   cd C:\path\to\extracted\folder
+   resource_backports
+   ```
 
 ### Unix
 On your preffered folder, run these on terminal:
 ```bash
 git clone https://github.com/deirn/resource-backports.git
 cd resource-backports
-chmod +x resource_backports.py
-./resource_backports.py
-```
-Or
-```bash
 python3 resource-backports.py
 ```
+Or, if you dont have git or python installed (which is silly):  
+1. Download the latest [release][releases],
+2. Extract it,
+3. On the extracted folder, run on terminal:
+   ```bash
+   chmod +x resource_backports
+   ./resource_backports
+   ```
 
 ## Limitations
 ### Bed
@@ -32,13 +42,11 @@ Effect icons is separated from Player Inventory GUI's texture and splitted to on
 Still based on texture version `3.6` appear on client version `1.14`. The thing is, in `1.15` it messed up with chests' model and that means it'll broke the ender chest texture if I update it. I decided to ignore the fireball since it less common.
 
 
-[badge1]: https://img.shields.io/badge/Minecraft-Java%20Edition-brightgreen
+[badge]: https://img.shields.io/badge/Minecraft-Java%20Edition-brightgreen
 [wiki/flattening]: https://minecraft.gamepedia.com/Java_Edition_1.13/Flattening
 [wiki/texture_update]: https://minecraft.gamepedia.com/Texture_Update
 [eula]: https://account.mojang.com/documents/minecraft_eula
 [terms]: https://account.mojang.com/terms
-[client.jar]: https://launcher.mojang.com/v1/objects/8c325a0c5bd674dd747d6ebaa4c791fd363ad8a9/client.jar
-[mappings]: mappings.json
+[releases]: https://github.com/deirn/resource-backports/releases
 [bed_f]: workarounds/bed_foot.json
 [bed_h]: workarounds/bed_head.json
-[update_aquatic]: https://minecraft.gamepedia.com/Update_Aquatic
