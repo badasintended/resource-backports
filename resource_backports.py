@@ -128,8 +128,8 @@ mappings = parse_json(mappings_path)
 
 
 def copy_texture(source, target):
-    source_path = join_path(source_texture_dir, "%s.png" % source)
-    target_path = join_path(target_texture_dir, "%s.png" % target)
+    source_path = join_path(source_texture_dir, "%s" % source)
+    target_path = join_path(target_texture_dir, "%s" % target)
     target_dir = target_path.parent
     create_dir(target_dir)
     func = lambda: shutil.copyfile(source_path, target_path)
