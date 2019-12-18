@@ -8,6 +8,7 @@ import os
 from threading import Thread
 from pathlib import Path
 from zipfile import ZipFile
+from PIL import Image
 
 BUFF_SIZE = 65536
 
@@ -94,7 +95,7 @@ if Path(client_path).exists():
                 break
             sha1.update(data)
     if sha1.hexdigest() == client_sha1:
-        print("Found latest client jar with correct SHA1, skipping download.")
+        print("Found 1.14 client jar with correct SHA1, skipping download.")
         dl_client = False
 
 if dl_client:
@@ -122,8 +123,7 @@ create_dir(target_root_dir)
 target_texture_dir = join_path(target_root_dir, "assets/minecraft/textures")
 create_dir(target_texture_dir)
 
-mappings_path = join_path(root_dir, "mappings.json")
-
+mappings_path = join_path(root_dir, "mappings/normal.json")
 mappings = parse_json(mappings_path)
 
 
@@ -143,6 +143,88 @@ for source, target in mappings.items():
         continue
     copy_texture(source, target)
 
+
+# Villager and Zombie Villager Skin
+villager_mappings_path = join_path(root_dir, "mappings/villager.json")
+villager_mappings = parse_json(villager_mappings_path)
+
+entity_source_dir = join_path(source_texture_dir, "entity")
+entity_target_dir = join_path(target_texture_dir, "entity")
+
+
+def villager_create_image(layer0, layer1, layer2, target_path):
+    bg = Image.open(layer0)
+    fg1 = Image.open(layer1)
+    fg2 = Image.open(layer2)
+    bg.paste(fg1, (0, 0), fg1)
+    bg.paste(fg2, (0, 0), fg2)
+    bg.save(target_path)
+
+
+def villager(prefix=""):
+    layer0 = join_path(entity_source_dir, "%svillager/%svillager.png" % (prefix, prefix))
+    layer1 = join_path(entity_source_dir, "%svillager/type/plains.png" % prefix)
+    layer2_dir = join_path(entity_source_dir, "%svillager/profession" % prefix)
+    target_dir = join_path(entity_target_dir, "%svillager" % prefix)
+    create_dir(target_dir)
+    for source, target in villager_mappings.items():
+        layer2 = join_path(layer2_dir, "%s.png" % source)
+        target_path = join_path(entity_target_dir, "%svillager/%s%s.png" % (prefix, prefix, target))
+        func = lambda: villager_create_image(layer0, layer1, layer2, target_path)
+        loading(func, "Creating Villager Texture (%s%s)" % (prefix, target))
+
+
+villager()           # Regular
+villager("zombie_")  # Zombie villager
+
+# Zombie Villager Edits: Hat and hand
+hat_area = Image.new("RGBA", (32, 20), (255, 255, 255, 0))
+
+
+def zombie_villager_edit(target_image, target_path):
+    target_image.paste(hat_area, (32, 0))
+    hand_area = target_image.crop((44, 22, 60, 38))
+    target_image.paste(hand_area, (44, 38), hand_area)
+    target_image.save(target_path)
+
+
+for unused, target in villager_mappings.items():
+    target_path = join_path(entity_target_dir, "zombie_villager/zombie_%s.png" % target)
+    target_image = Image.open(target_path).convert("RGBA")
+    func = lambda: zombie_villager_edit(target_image, target_path)
+    loading(func, "Editing zombie_%s.png" % target)
+
+
+# GUI Effects
+gui_effect_mapping_path = join_path(root_dir, "mappings/gui_effect.json")
+gui_effect_mapping = parse_json(gui_effect_mapping_path)
+
+gui_source_path = join_path(source_texture_dir, "gui/container/inventory.png")
+effect_source_dir = join_path(source_texture_dir, "mob_effect")
+
+gui_target_dir = join_path(target_texture_dir, "gui/container")
+create_dir(gui_target_dir)
+
+gui_target_path = join_path(gui_target_dir, "inventory.png")
+
+func = lambda: shutil.copyfile(gui_source_path, gui_target_path)
+loading(func, "Copying gui/container/inventory.png to gui/container/inventory.png")
+
+
+def gui_effect_edit(effect, coordinates):
+    effect_path = join_path(effect_source_dir, "%s.png" % effect)
+    bg = Image.open(gui_target_path)
+    fg = Image.open(effect_path)
+    bg.paste(fg, coordinates, fg)
+    bg.save(gui_target_path)
+
+
+for effect, coordinates in gui_effect_mapping.items():
+    func = lambda: gui_effect_edit(effect, coordinates)
+    loading(func, "Adding %s effect texture to gui/container/inventory.png" % effect)
+
+
+# Bed Workaround
 if target_version in ["1.8", "1.10"]:
     source_workaround = [
         join_path(root_dir, "workarounds/bed_foot.json"),
@@ -156,6 +238,7 @@ if target_version in ["1.8", "1.10"]:
         create_dir(target_workaround[i].parent)
         func = lambda: shutil.copyfile(source_workaround[i], target_workaround[i])
         loading(func, "Copying workaround (%s/2)" % str(i))
+
 
 pack_mcmeta = """
 {

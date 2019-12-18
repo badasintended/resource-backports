@@ -35,11 +35,11 @@ Or, if you dont have git or python installed (which is silly):
 ### Bed
 On `1.10` and before, bed is a regular block, not a block entity. Therefore the texture structure is different from version `1.11` and after. A model workaround is required. See [`bed_foot.json`][bed_f] and [`bed_head.json`][bed_h]
 
-### Effect Icons
-Effect icons is separated from Player Inventory GUI's texture and splitted to one image per effect. Generating image is too hard to do right now with my limited knowledge<sup>[*to be added later, maybe*]().</sup>
-
 ### Dragon Fireball
 Still based on texture version `3.6` appear on client version `1.14`. The thing is, in `1.15` it messed up with chests' model and that means it'll broke the ender chest texture if I update it. I decided to ignore the fireball since it less common.
+
+### Horses
+Model changed, so texture breaks on older version. <sup><sub><sup><sub><sup><sub><sup><sub>To hard to do right now, might add later.</sup></sub></sup></sub></sup></sub></sup></sub>
 
 
 [badge]: https://img.shields.io/badge/Minecraft-Java%20Edition-brightgreen
