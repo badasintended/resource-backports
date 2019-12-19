@@ -17,7 +17,8 @@ Well, although it will be easier to the players and especially **me**, it breaks
 ### Unix
 On your preffered folder, run these on terminal:
 ```bash
-curl https://raw.githubusercontent.com/deirn/resource-backports/master/resource_backports.py | python3
+wget -q https://raw.githubusercontent.com/deirn/resource-backports/master/resource_backports.py 
+python3 resource_backports.py 
 ```
 Or:  
 1. Download the latest [release][releases],
