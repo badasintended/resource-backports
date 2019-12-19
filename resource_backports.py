@@ -5,6 +5,7 @@ import json
 import hashlib
 import shutil
 import os
+import requests
 from threading import Thread
 from pathlib import Path
 from zipfile import ZipFile
@@ -34,12 +35,6 @@ def loading(target, message):
     print("%s [Done]" % message)
 
 
-def parse_json(path):
-    raw_file = Path(path).read_text()
-    parsed_file = json.loads(raw_file)
-    return parsed_file
-
-
 def join_path(path1, path2):
     return Path("%s/%s" % (path1, path2))
 
@@ -57,8 +52,7 @@ Resource Backports v0.1
 github.com/deirn/resource-backports
 Undo The Flattening(TM)!
 
-You need an internet connection to use this script, atleast for
-the first time, to download the client.jar avaliable from Mojang
+You need an internet connection to use this script.
 
 Select target version:
 1.) 1.6.1-1.8.9
@@ -123,8 +117,9 @@ create_dir(target_root_dir)
 target_texture_dir = join_path(target_root_dir, "assets/minecraft/textures")
 create_dir(target_texture_dir)
 
-mappings_path = join_path(root_dir, "mappings/normal.json")
-mappings = parse_json(mappings_path)
+raw_github_url = "https://raw.githubusercontent.com/deirn/resource-backports/master"
+
+mappings = requests.get("%s/mappings/normal.json" % raw_github_url).json()
 
 
 def copy_texture(source, target):
@@ -145,8 +140,7 @@ for source, target in mappings.items():
 
 
 # Villager and Zombie Villager Skin
-villager_mappings_path = join_path(root_dir, "mappings/villager.json")
-villager_mappings = parse_json(villager_mappings_path)
+villager_mappings = requests.get("%s/mappings/villager.json" % raw_github_url).json()
 
 entity_source_dir = join_path(source_texture_dir, "entity")
 entity_target_dir = join_path(target_texture_dir, "entity")
@@ -196,8 +190,7 @@ for unused, target in villager_mappings.items():
 
 
 # GUI Effects
-gui_effect_mapping_path = join_path(root_dir, "mappings/gui_effect.json")
-gui_effect_mapping = parse_json(gui_effect_mapping_path)
+gui_effect_mapping = requests.get("%s/mappings/gui_effect.json" % raw_github_url).json()
 
 gui_source_path = join_path(source_texture_dir, "gui/container/inventory.png")
 effect_source_dir = join_path(source_texture_dir, "mob_effect")
@@ -227,8 +220,8 @@ for effect, coordinates in gui_effect_mapping.items():
 # Bed Workaround
 if target_version in ["1.8", "1.10"]:
     source_workaround = [
-        join_path(root_dir, "workarounds/bed_foot.json"),
-        join_path(root_dir, "workarounds/bed_head.json")
+        requests.get("%s/workarounds/bed_foot.json" % raw_github_url).text,
+        requests.get("%s/workarounds/bed_head.json" % raw_github_url).text
     ]
     target_workaround = [
         join_path(target_root_dir, "assets/minecraft/models/block/bed_foot.json"),
@@ -236,7 +229,8 @@ if target_version in ["1.8", "1.10"]:
     ]
     for i in [0, 1]:
         create_dir(target_workaround[i].parent)
-        func = lambda: shutil.copyfile(source_workaround[i], target_workaround[i])
+        target_workaround_file = open(target_workaround[i], "w")
+        func = lambda: target_workaround_file.write(source_workaround[i])
         loading(func, "Copying workaround (%s/2)" % str(i))
 
 

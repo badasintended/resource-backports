@@ -7,25 +7,21 @@ Well, although it will be easier to the players and especially **me**, it breaks
 ## How?
 ### Windows
 1. Download the latest [release][releases],
-2. Extract it,
-3. Open command prompt (`Win+R cmd`),
-4. Run these on cmd:
+2. Open command prompt (`Win+R cmd`),
+3. Run these on cmd:
    ```cmd
-   cd C:\path\to\extracted\folder
+   cd C:\path\to\download\folder
    resource_backports
    ```
 
 ### Unix
 On your preffered folder, run these on terminal:
 ```bash
-git clone https://github.com/deirn/resource-backports.git
-cd resource-backports
-python3 resource-backports.py
+curl https://raw.githubusercontent.com/deirn/resource-backports/master/resource_backports.py | python3
 ```
-Or, if you dont have git or python installed (which is silly):  
+Or:  
 1. Download the latest [release][releases],
-2. Extract it,
-3. On the extracted folder, run on terminal:
+2. On the download folder:
    ```bash
    chmod +x resource_backports
    ./resource_backports
