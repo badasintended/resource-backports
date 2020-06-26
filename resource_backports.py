@@ -166,12 +166,21 @@ def copy_texture(source, target):
     create_dir(target_dir)
     if source_path.exists():
         func = lambda: shutil.copyfile(source_path, target_path)
+<<<<<<< HEAD
         loading(func, "Copying %s.png to %s.png" % (source, target))
         source_mcmeta = Path(str(source_path)+".mcmeta")
         target_mcmeta = Path(str(target_path)+".mcmeta")
         if source_mcmeta.exists():
             func = lambda: shutil.copyfile(source_mcmeta, target_mcmeta)
             loading(func, "Copying %s.png.mcmeta to %s.png.mcmeta" % (source, target))
+=======
+        loading(func, "Copying %s to %s" % (source, target))
+        source_mcmeta = Path(source_path+".mcmeta")
+        target_mcmeta = Path(target_path+".mcmeta")
+        if source_mcmeta.exists():
+            func = lambda: shutil.copyfile(source_mcmeta, target_mcmeta)
+            loading(func, "Copying %s to %s" % (source_mcmeta, target_mcmeta))
+>>>>>>> e8bde8f7d5d1c34d2683d703522a12b597631270
     else:
         print("Source for %s not found, skipping" % target)
 
