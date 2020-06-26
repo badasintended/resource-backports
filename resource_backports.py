@@ -48,7 +48,7 @@ create_dir(input_path)
 clear()
 
 print("""
-Resource Backports v0.1
+Resource Backports v0.2
 github.com/deirn/resource-backports
 Undo The Flattening(TM)!
 
@@ -62,27 +62,64 @@ or q to cancel
 
 """[1:-1])
 
-target_input = str(input("[1/2/3/q]: ")).lower()
+target_input = str(input("[1/2/3/q]: ")).lower().strip()
 while True:
     if target_input in ["1", "2", "3", "q"]:
         break
-    target_input = str(input("Try again. [1/2/3/q]: ")).lower()
+    target_input = str(input("Try again. [1/2/3/q]: ")).lower().strip()
 
 if target_input == "q":
     exit()
 
 clear()
 
-client_url = "https://launcher.mojang.com/v1/objects/8c325a0c5bd674dd747d6ebaa4c791fd363ad8a9/client.jar"
+print("""
+Do you want to use your own resource pack or download jar from Mojang?
+
+1.) Download from Mojang
+2.) Use different pack
+or q to cancel
+"""[1:-1])
+
+resource_input = str(input("[1/2/q]: ")).lower().strip()
+while True:
+    if resource_input in ["1", "2", "q"]:
+        break
+    resource_input = str(input("Try again. [1/2/q]: ")).lower().strip()
+
+if resource_input == "q":
+    exit()
+
+clear()
+
+dl_url = "https://launcher.mojang.com/v1/objects/8c325a0c5bd674dd747d6ebaa4c791fd363ad8a9/client.jar"
 client_sha1 = "8c325a0c5bd674dd747d6ebaa4c791fd363ad8a9"
-client_file_name = "1.14.jar"
-client_path = join_path(input_path, client_file_name)
+dl_file_name = "1.14.jar"
+dl_path = join_path(input_path, dl_file_name)
 
 dl_client = True
 
-if Path(client_path).exists():
+if resource_input == "2":
+    resource_path = str(input("Link/path to custom pack: "))
+    is_local = False
+    if resource_path.startswith("http"):
+        if resource_path.startswith("http://") or resource_path.startswith("https://"):
+            dl_url = resource_path
+            dl_file_name = resource_path.split("/")[-1]
+            dl_path = join_path(input_path, dl_file_name)
+        else: 
+            is_local = True
+    else: is_local = True
+    if is_local:
+        dl_path = Path(resource_path)
+        dl_client = False
+    
+    clear()
+
+
+if Path(dl_path).exists():
     sha1 = hashlib.sha1()
-    with Path(client_path).open(mode="rb") as f:
+    with Path(dl_path).open(mode="rb") as f:
         while True:
             data = f.read(BUFF_SIZE)
             if not data:
@@ -93,15 +130,15 @@ if Path(client_path).exists():
         dl_client = False
 
 if dl_client:
-    func = lambda: urllib.request.urlretrieve(client_url, client_path)
-    loading(func, "Downloading %s" % client_url)
+    func = lambda: urllib.request.urlretrieve(dl_url, dl_path)
+    loading(func, "Downloading %s" % dl_url)
 
 client_dir = join_path(input_path, "1.14")
 create_dir(client_dir)
 
-with ZipFile(client_path, "r") as client_zip:
+with ZipFile(dl_path, "r") as client_zip:
     func = lambda: client_zip.extractall(client_dir)
-    loading(func, "Extracting %s" % client_path)
+    loading(func, "Extracting %s" % dl_path)
 
 target_versions = ["1.8", "1.10", "1.12"]
 target_version = target_versions[int(target_input) - 1]
@@ -123,12 +160,20 @@ mappings = requests.get("%s/mappings/normal.json" % raw_github_url).json()
 
 
 def copy_texture(source, target):
-    source_path = join_path(source_texture_dir, "%s" % source)
-    target_path = join_path(target_texture_dir, "%s" % target)
+    source_path = join_path(source_texture_dir, "%s.png" % source)
+    target_path = join_path(target_texture_dir, "%s.png" % target)
     target_dir = target_path.parent
     create_dir(target_dir)
-    func = lambda: shutil.copyfile(source_path, target_path)
-    loading(func, "Copying %s to %s" % (source, target))
+    if source_path.exists():
+        func = lambda: shutil.copyfile(source_path, target_path)
+        loading(func, "Copying %s.png to %s.png" % (source, target))
+        source_mcmeta = Path(str(source_path)+".mcmeta")
+        target_mcmeta = Path(str(target_path)+".mcmeta")
+        if source_mcmeta.exists():
+            func = lambda: shutil.copyfile(source_mcmeta, target_mcmeta)
+            loading(func, "Copying %s.png.mcmeta to %s.png.mcmeta" % (source, target))
+    else:
+        print("Source for %s not found, skipping" % target)
 
 
 for source, target in mappings.items():
@@ -147,9 +192,9 @@ entity_target_dir = join_path(target_texture_dir, "entity")
 
 
 def villager_create_image(layer0, layer1, layer2, target_path):
-    bg = Image.open(layer0)
-    fg1 = Image.open(layer1)
-    fg2 = Image.open(layer2)
+    bg = Image.open(layer0).convert("RGBA")
+    fg1 = Image.open(layer1).convert("RGBA")
+    fg2 = Image.open(layer2).convert("RGBA")
     bg.paste(fg1, (0, 0), fg1)
     bg.paste(fg2, (0, 0), fg2)
     bg.save(target_path)
@@ -172,13 +217,12 @@ villager()           # Regular
 villager("zombie_")  # Zombie villager
 
 # Zombie Villager Edits: Hat and hand
-hat_area = Image.new("RGBA", (32, 20), (255, 255, 255, 0))
-
-
 def zombie_villager_edit(target_image, target_path):
-    target_image.paste(hat_area, (32, 0))
-    hand_area = target_image.crop((44, 22, 60, 38))
-    target_image.paste(hand_area, (44, 38), hand_area)
+    scale = int(target_image.height / 64)
+    hat_area = Image.new("RGBA", ((32 * scale), (20 * scale)), (255, 255, 255, 0))
+    target_image.paste(hat_area, ((32 * scale), 0))
+    hand_area = target_image.crop(((44 * scale), (22 * scale), (60 * scale), (38 * scale)))
+    target_image.paste(hand_area, ((44 * scale), (38 * scale)), hand_area)
     target_image.save(target_path)
 
 
@@ -204,16 +248,17 @@ func = lambda: shutil.copyfile(gui_source_path, gui_target_path)
 loading(func, "Copying gui/container/inventory.png to gui/container/inventory.png")
 
 
-def gui_effect_edit(effect, coordinates):
+def gui_effect_edit(effect, coords):
     effect_path = join_path(effect_source_dir, "%s.png" % effect)
-    bg = Image.open(gui_target_path)
-    fg = Image.open(effect_path)
-    bg.paste(fg, coordinates, fg)
+    bg = Image.open(gui_target_path).convert("RGBA")
+    scale = int(bg.height / 256)
+    fg = Image.open(effect_path).convert("RGBA")
+    bg.paste(fg, ((coords[0] * scale), (coords[1] * scale)), fg)
     bg.save(gui_target_path)
 
 
-for effect, coordinates in gui_effect_mapping.items():
-    func = lambda: gui_effect_edit(effect, coordinates)
+for effect, coords in gui_effect_mapping.items():
+    func = lambda: gui_effect_edit(effect, coords)
     loading(func, "Adding %s effect texture to gui/container/inventory.png" % effect)
 
 
