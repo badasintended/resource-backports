@@ -14,10 +14,22 @@ Well, although it will be easier to the players and especially **me**, it breaks
    cd C:\path\to\download\folder
    resource_backports
    ```
+Or:
+1. Download & install python3
+2. Clone this repo
+3. Open cmd
+4. cd to cloned repo dir
+4. ```
+   py -m pip install requests
+   py -m pip install pillow
+   py resource_backports.py
+   ```
 
 ### Unix
 On an empty folder, run these on terminal:
 ```bash
+python3 -m pip3 install requests
+pythin3 -m pip3 install pillow
 wget -q https://raw.githubusercontent.com/deirn/resource-backports/master/resource_backports.py 
 python3 resource_backports.py 
 ```
